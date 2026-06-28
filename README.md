@@ -46,7 +46,7 @@ Software Update).
 - **Do not sign into an Apple ID.** Skip it during setup.
 - Keep it empty: no personal files, no synced accounts.
 
-### Make the account an admin
+### Make the account an admin (if you haven't already)
 
 The account needs admin rights or `sudo` will refuse to run (`<user> is not in the
 sudoers file. This incident has been reported to the administrator.`).
