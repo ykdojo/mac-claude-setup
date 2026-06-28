@@ -88,8 +88,15 @@ sudo chmod 440 /etc/sudoers.d/<user>-nopasswd
 sudo visudo -cf /etc/sudoers.d/<user>-nopasswd   # validate - must print 'parsed OK'
 ```
 
-Always validate with `visudo -cf`: a syntax error in a sudoers file can lock you out
-of `sudo` entirely. After this, `sudo -n true` succeeds with no prompt.
+This creates a small rule file telling the Mac that `<user>` can run `sudo` without a
+password prompt:
+
+- **line 1** writes the rule into `/etc/sudoers.d/`.
+- **line 2** makes it read-only - sudo ignores the file otherwise.
+- **line 3** validates the syntax; a typo in a sudoers file can lock you out of `sudo`
+  entirely, so it must print `parsed OK`.
+
+After this, `sudo` runs with no prompt (test with `sudo -n true`).
 
 > **Security note.** This grants full passwordless root to anyone who can SSH in as
 > `<user>`. That's an acceptable trade-off here because the account is an isolated
