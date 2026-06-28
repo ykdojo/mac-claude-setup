@@ -112,12 +112,10 @@ scutil --get LocalHostName      # prints the hostname, e.g. MacBook-Pro
 Add `.local` to form the address: `<target-host>.local`. You can also read it from
 System Settings -> General -> Sharing, shown as `Local hostname`.
 
-> **Give the target a unique name.** A spare Mac often has the same default name as
-> your main Mac (e.g. both are `yks-macbook-pro.local`). Two machines on the same
-> network can't share a `.local` name, so the system quietly renames one (e.g. to
-> `yks-macbook-pro-2.local`) - and which Mac that points to can change, so the
-> address is unreliable. Rename the target to something unique so its `.local`
-> address always points to it:
+> **Give the target a unique name.** Each Mac needs a `.local` name that's unique on
+> your network. Spare Macs often share the same default name, and if two machines
+> share one, the address can point to the wrong Mac. Make sure the target's name is
+> unique - rename it if needed:
 >
 > ```bash
 > sudo scutil --set LocalHostName newmacbook   # -> newmacbook.local
