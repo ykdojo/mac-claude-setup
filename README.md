@@ -58,11 +58,26 @@ sudoers file. This incident has been reported to the administrator.`).
 
 ---
 
-## 2. Passwordless sudo for the target account
+## 2. Enable Remote Login (SSH) on the target Mac
+
+**Method used here (verified):** `sudo systemsetup -setremotelogin on`
+
+This fails with `Turning Remote Login on or off requires Full Disk Access privileges`
+unless your terminal app has Full Disk Access. To grant it:
+
+- System Settings -> Privacy & Security -> **Full Disk Access** (scroll the privacy
+  list to find it).
+- Click **+**, then in the file picker go to **Applications -> Utilities -> Terminal**
+  and add it.
+- Quit and reopen the terminal, then rerun the command.
+
+---
+
+## 3. Passwordless sudo for the target account
 
 So the agent (and your SSH commands) can run admin tasks - `pmset`, `scutil`,
-installs - without a password prompt each time. Run **once on the target** (it asks
-for the login password this one time):
+installs - without a password prompt each time. Run it **once** (over SSH now that
+login is on, or at the target itself - it asks for the login password this one time):
 
 ```bash
 echo "<user> ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/<user>-nopasswd >/dev/null
@@ -77,21 +92,6 @@ of `sudo` entirely. After this, `sudo -n true` succeeds with no prompt.
 > `<user>`. That's an acceptable trade-off here because the account is an isolated
 > sandbox with no personal data and SSH is key-only. To narrow it, replace `ALL` with
 > a specific command, e.g. `NOPASSWD: /usr/bin/pmset, /usr/sbin/scutil`.
-
----
-
-## 3. Enable Remote Login (SSH) on the target Mac
-
-**Method used here (verified):** `sudo systemsetup -setremotelogin on`
-
-This fails with `Turning Remote Login on or off requires Full Disk Access privileges`
-unless your terminal app has Full Disk Access. To grant it:
-
-- System Settings -> Privacy & Security -> **Full Disk Access** (scroll the privacy
-  list to find it).
-- Click **+**, then in the file picker go to **Applications -> Utilities -> Terminal**
-  and add it.
-- Quit and reopen the terminal, then rerun the command.
 
 ---
 
