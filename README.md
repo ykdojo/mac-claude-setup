@@ -138,21 +138,23 @@ The IP comes from DHCP and can change after a reboot or when the lease expires.
 
 ## 5. Set up passwordless SSH from the source Mac
 
-On the **source** Mac:
+On the **source** Mac, create an SSH key (skip if you already have one):
 
 ```bash
-# Create a key only if you don't already have one
 ssh-keygen -t ed25519
+```
 
-# Install your public key on the target (asks for the target account's
-# LOGIN password once - not your Apple ID, not the source Mac's password)
+Install your public key on the target. This asks for the target account's **login
+password** once - not your Apple ID, not the source Mac's password:
+
+```bash
 ssh-copy-id <user>@<target-host>.local
 ```
 
-Test it:
+Test it - this should print the target username with no password prompt:
 
 ```bash
-ssh <user>@<target-host>.local whoami   # should print the target username, no password
+ssh <user>@<target-host>.local whoami
 ```
 
 ---
