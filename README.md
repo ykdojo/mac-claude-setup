@@ -22,9 +22,6 @@ to control it from your main machine.
 - A spare Mac (the **target**).
 - Your everyday Mac (the **source**), on the same Wi-Fi.
 
-Terminology used below: **target** = the spare Mac running Claude Code, **source** =
-your main Mac you type on.
-
 ---
 
 ## 1. Create a fresh, isolated account on the target Mac
