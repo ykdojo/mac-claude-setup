@@ -21,7 +21,6 @@ to control it from your main machine.
 
 - A spare Mac (the **target**).
 - Your everyday Mac (the **source**), on the same Wi-Fi.
-- Both able to see each other on the local network.
 
 Terminology used below: **target** = the spare Mac running Claude Code, **source** =
 your main Mac you type on.
