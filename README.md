@@ -120,7 +120,7 @@ System Settings -> General -> Sharing, shown as `Local hostname`.
 > sudo scutil --set LocalHostName newmacbook   # -> newmacbook.local
 > ```
 
-**IP address.** Run on the target:
+**IP address (not recommended).** Run on the target:
 
 ```bash
 ipconfig getifaddr en0          # e.g. 192.168.1.80
