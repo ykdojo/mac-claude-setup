@@ -157,12 +157,6 @@ Test it:
 ssh <user>@<target-host>.local whoami   # should print the target username, no password
 ```
 
-To get an interactive shell on the target:
-
-```bash
-ssh <user>@<target-host>.local
-```
-
 ---
 
 ## 6. Clipboard sync over SSH
@@ -186,8 +180,6 @@ Usage - the commands take **no arguments**; they act on your system clipboard:
 
 - **sendclip**: copy on the source (Cmd-C), run `sendclip`, paste on the target (Cmd-V).
 - **getclip**: copy on the target (Cmd-C), run `getclip`, paste on the source (Cmd-V).
-
-Handles multi-line text, code, URLs - anything plain text.
 
 ---
 
