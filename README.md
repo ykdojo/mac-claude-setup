@@ -159,7 +159,31 @@ ssh <user>@<target-host>.local whoami
 
 ---
 
-## 6. Clipboard sync over SSH
+## 6. Keep the target awake (prevent sleep)
+
+By default macOS sleeps after ~10 minutes idle, **even on AC power**, which takes it
+off the network. For a headless remote box you want it to never sleep while plugged in.
+
+Run on the target (or over SSH from the source):
+
+```bash
+sudo pmset -c sleep 0          # never system-sleep while on AC power (-c = on charger)
+sudo pmset -c disablesleep 1   # also prevents sleep with the lid closed (clamshell)
+```
+
+Verify:
+
+```bash
+pmset -g | grep -iE 'sleep'    # 'sleep 0' and 'SleepDisabled 1' confirm it
+```
+
+The display can still sleep (`displaysleep`) - that's fine, it doesn't drop the
+network. If the machine runs on battery sometimes, use `-a` instead of `-c` to apply
+to all power sources (at the cost of battery drain).
+
+---
+
+## 7. Clipboard sync over SSH
 
 macOS ships `pbcopy` (write clipboard) and `pbpaste` (read clipboard). Piped over SSH,
 they move the clipboard between machines - encrypted, peer-to-peer, no account, no
@@ -185,7 +209,7 @@ The commands take **no arguments** - they act on your system clipboard:
 
 ---
 
-## 7. Install Claude Code on the target Mac
+## 8. Install Claude Code on the target Mac
 
 Send the install command over and run it. From the source Mac you can push it straight
 to the target's clipboard, or run it remotely:
@@ -208,30 +232,6 @@ ssh <user>@<target-host>.local
 ```
 
 Then run `claude` and follow the login prompts.
-
----
-
-## 8. Keep the target awake (prevent sleep)
-
-By default macOS sleeps after ~10 minutes idle, **even on AC power**, which takes it
-off the network. For a headless remote box you want it to never sleep while plugged in.
-
-Run on the target (or over SSH from the source):
-
-```bash
-sudo pmset -c sleep 0          # never system-sleep while on AC power (-c = on charger)
-sudo pmset -c disablesleep 1   # also prevents sleep with the lid closed (clamshell)
-```
-
-Verify:
-
-```bash
-pmset -g | grep -iE 'sleep'    # 'sleep 0' and 'SleepDisabled 1' confirm it
-```
-
-The display can still sleep (`displaysleep`) - that's fine, it doesn't drop the
-network. If the machine runs on battery sometimes, use `-a` instead of `-c` to apply
-to all power sources (at the cost of battery drain).
 
 ---
 
