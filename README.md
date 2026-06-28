@@ -24,7 +24,23 @@ to control it from your main machine.
 
 ---
 
-## 1. Create a fresh, isolated account on the target Mac
+## 1. Start fresh on the target Mac
+
+### Wipe it first (recommended for a hand-me-down)
+
+If the target still has old data on it, erase it so nothing personal is left for the
+agent to reach:
+
+- **Macs that support it:** System Settings -> General -> Transfer or Reset ->
+  **Erase All Content and Settings**.
+- **Older Intel Macs (or to repartition):** restart into Recovery (hold **Cmd-R** at
+  boot), use **Disk Utility** to erase the internal drive, then reinstall macOS. Delete
+  any leftover **Boot Camp / Windows** partition while you're there.
+
+Optionally update to the latest macOS afterward (System Settings -> General ->
+Software Update).
+
+### Create a fresh, isolated account
 
 - Create a **new local user account** (System Settings -> Users & Groups).
 - **Do not sign into an Apple ID.** Skip it during setup.
