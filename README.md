@@ -14,8 +14,8 @@ The approach here:
 - **Drive it over SSH** from your main Mac on the local network.
 - **Move text between the two with a clipboard-over-SSH shortcut.**
 
-The result is an isolated sandbox you can give full access to, while still controlling
-it from your main machine.
+The result is an isolated sandbox you can give full access to, while still being able
+to control it from your main machine.
 
 ## What you need
 
