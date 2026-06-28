@@ -161,13 +161,14 @@ ssh <user>@<target-host>.local whoami
 
 ## 6. Keep the target awake
 
-By default macOS sleeps after ~10 minutes idle, **even on AC power**, which takes it
-off the network. For a headless remote box you want it to never sleep while plugged in.
+By default macOS sleeps after ~10 minutes idle, **even when plugged in**, which takes
+it off the network. For a headless remote box you want it to never sleep while plugged
+in.
 
 Run on the target (or over SSH from the source):
 
 ```bash
-sudo pmset -c sleep 0          # never system-sleep while on AC power (-c = on charger)
+sudo pmset -c sleep 0          # never system-sleep while plugged in (-c = on charger)
 sudo pmset -c disablesleep 1   # also prevents sleep with the lid closed (clamshell)
 ```
 
