@@ -364,12 +364,6 @@ ic kill [id]  # kill a session (alias: ic k); "ic kill all" kills all; bare = th
 ic -h         # help
 ```
 
-Detach with **Ctrl-A** then **D** - the session keeps running on the box; reattach with
-`ic a <id>`. Sessions are spawned through the persistent `cc` anchor so they inherit the GUI
-login session, which is what makes computer use work. (Only one session should drive the GUI
-at a time - separate text conversations are fine in parallel, but two doing computer use at
-once would fight over the one mouse and keyboard.)
-
 All `ic` claude sessions run with `--dangerously-skip-permissions` (and `ic rc` spawns
 phone sessions with `--permission-mode bypassPermissions`) - the box is an isolated sandbox
 with nothing sensitive to reach, so prompts are auto-approved. That's the whole point of
