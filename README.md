@@ -21,12 +21,6 @@ to control it from your main machine.
 
 - A spare Mac (the **target**).
 - Your everyday Mac (the **source**), on the same Wi-Fi.
-- This repo cloned on the **source** Mac - steps 9 and 11 copy its scripts to the target:
-
-  ```bash
-  git clone https://github.com/ykdojo/mac-claude-setup.git
-  cd mac-claude-setup
-  ```
 
 ---
 
@@ -249,18 +243,20 @@ yt-dlp. Every item is toggleable; see the full list in
 [`claude-env-components.md`](claude-env-components.md).
 
 **Interactively on the target** - shows a checklist of every item (core
-pre-checked, opt-ins unchecked) so you can pick any combination:
+pre-checked, opt-ins unchecked) so you can pick any combination. Download the
+script onto the target and run it:
 
 ```bash
-scp setup-claude-env.sh <user>@<target-host>.local:
-ssh -t <user>@<target-host>.local './setup-claude-env.sh'
+ssh -t <user>@<target-host>.local \
+  'curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/setup-claude-env.sh -o setup-claude-env.sh && bash setup-claude-env.sh'
 ```
 
-**Non-interactively from the source** - no prompt; core only, or add flags
-(`--yt-dlp`, `--playwright`, `--all`, `--core`):
+**Non-interactively** - no prompt; core only, or add flags (`--yt-dlp`,
+`--playwright`, `--all`, `--core`):
 
 ```bash
-ssh <user>@<target-host>.local 'bash -s -- --all' < setup-claude-env.sh
+ssh <user>@<target-host>.local \
+  'curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/setup-claude-env.sh -o setup-claude-env.sh && bash setup-claude-env.sh --all'
 ```
 
 The script is idempotent (OK to re-run).
@@ -319,17 +315,17 @@ Sharing.
 
 ### Scriptable setup
 
-Copy [`setup-computer-use.sh`](setup-computer-use.sh) to the target and run it there:
+Download [`setup-computer-use.sh`](setup-computer-use.sh) onto the target and run it there:
 
 ```bash
-scp setup-computer-use.sh <user>@<target-host>.local:
-ssh -t <user>@<target-host>.local './setup-computer-use.sh'
+ssh -t <user>@<target-host>.local \
+  'curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/setup-computer-use.sh -o setup-computer-use.sh && bash setup-computer-use.sh'
 ```
 
 This installs the LaunchAgent (`~/Library/LaunchAgents/com.boxclaude.plist`, a persistent
 `screen` session named `cc`) and enables the built-in `computer-use` tool in
 `~/.claude.json` (no `/mcp` menu needed). Requires a **Claude Pro or Max** plan. Re-runnable;
-run `./setup-computer-use.sh --uninstall` on the target to remove the LaunchAgent and session.
+run `bash setup-computer-use.sh --uninstall` on the target to remove the LaunchAgent and session.
 
 ### Use it from your Mac
 
