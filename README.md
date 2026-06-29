@@ -350,6 +350,7 @@ ic            # new claude session
 ic -c         # continue the most recent conversation (forwards to: claude -c)
 ic -r         # resume picker (forwards to: claude -r)
 ic sh         # a plain shell on the box, no claude (alias: ic shell)
+ic rc         # Remote Control: drive the box from your phone (claude remote-control)
 ic ls         # list live sessions on the box
 ic a [id]     # attach a running session (alias: ic attach; bare = attach if only one)
 ic kill [id]  # kill a session (alias: ic k); "ic kill all" kills all; bare = the only one
@@ -361,3 +362,9 @@ Detach with **Ctrl-A** then **D** - the session keeps running on the box; reatta
 login session, which is what makes computer use work. (Only one session should drive the GUI
 at a time - separate text conversations are fine in parallel, but two doing computer use at
 once would fight over the one mouse and keyboard.)
+
+Running through the GUI session matters for `ic rc` too: `claude remote-control` reads the
+login token from the macOS Keychain, which is only reachable inside the GUI session - so a
+plain `ssh ... claude remote-control` reports "not logged in", but `ic rc` works. Press
+**Ctrl+C** to stop Remote Control when you're done (it grants full access to the box while
+on).

@@ -34,6 +34,8 @@ Usage:
   ic -r              resume picker (forwards: claude -r)
   ic <claude flags>  any other args forward to claude
   ic sh              a plain shell on the box (no claude; alias: ic shell)
+  ic rc              Remote Control: drive the box from your phone
+                       (runs claude remote-control; extra args forward to it)
   ic ls              list live sessions on the box
   ic a [id]          attach a running session (alias: ic attach)
                        no id + exactly one session -> attaches it
@@ -85,6 +87,18 @@ case "${1:-}" in
     # GUI access (screencapture etc. work), unlike a plain `ssh` shell.
     sess="ic-sh-$(date +%H%M%S)-$$"
     ssh "$BOX" "screen -S $ANCHOR -X screen zsh -c 'screen -U -dmS $sess zsh'; \
+                for _ in \$(seq 25); do screen -ls 2>/dev/null | grep -q $sess && break; sleep 0.2; done"
+    exec ssh "$BOX" -t "screen -U -x $sess"
+    ;;
+
+  rc)
+    # Remote Control: drive the box's claude from your phone (claude.ai/code or
+    # the mobile app). Runs in a GUI-session screen so it can read the login
+    # token (the Keychain is only reachable inside the GUI session). Extra args
+    # forward to `claude remote-control` (e.g. --spawn=worktree --capacity=N).
+    shift
+    sess="ic-rc-$(date +%H%M%S)-$$"
+    ssh "$BOX" "screen -S $ANCHOR -X screen zsh -c 'screen -U -dmS $sess claude remote-control $*'; \
                 for _ in \$(seq 25); do screen -ls 2>/dev/null | grep -q $sess && break; sleep 0.2; done"
     exec ssh "$BOX" -t "screen -U -x $sess"
     ;;
