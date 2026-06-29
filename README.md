@@ -374,9 +374,3 @@ All `ic` claude sessions run with `--dangerously-skip-permissions` (and `ic rc` 
 phone sessions with `--permission-mode bypassPermissions`) - the box is an isolated sandbox
 with nothing sensitive to reach, so prompts are auto-approved. That's the whole point of
 running the agent here instead of on your main Mac.
-
-Running through the GUI session matters for `ic rc` too: `claude remote-control` reads the
-login token from the macOS Keychain, which is only reachable inside the GUI session - so a
-plain `ssh ... claude remote-control` reports "not logged in", but `ic rc` works. Press
-**Ctrl+C** to stop Remote Control when you're done (it grants full access to the box while
-on).
