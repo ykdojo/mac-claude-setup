@@ -134,7 +134,14 @@ ls -t "$d"/*.jsonl | head -10 | while read -r f; do
 done
 echo ""
 echo "  open/continue:  ic -r   (resume picker, has search)"
-echo "  the files are JSONL (one message per line) - grep/jq them directly"
+echo ""
+echo "  to search/read, grep or jq the files directly. each is JSONL, one JSON"
+echo "  object per line. key fields:"
+echo "    .type            user | assistant | system | attachment | ...  (filter user/assistant for messages)"
+echo "    .message.content string (user) or array of {type,text,...} blocks (assistant)"
+echo "    .timestamp  .cwd  .gitBranch  .sessionId"
+echo "  e.g.  ssh <box> 'grep -l TERM $d/*.jsonl'"
+echo "        ssh <box> \"jq -rs '[.[]|select(.type==\\\"user\\\")][].message.content' FILE\""
 RSCRIPT
     ;;
 
