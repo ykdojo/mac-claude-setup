@@ -28,6 +28,10 @@ usage() {
   cat <<'EOF'
 ic - "isolated claude": run Claude Code on the box over SSH, with computer use.
 
+All claude sessions run with --dangerously-skip-permissions (the box is an
+isolated sandbox, so prompts are auto-approved); ic rc spawns phone sessions
+with --permission-mode bypassPermissions for the same reason.
+
 Usage:
   ic                 new claude session
   ic -c              continue the most recent conversation (forwards: claude -c)
@@ -98,7 +102,8 @@ case "${1:-}" in
     # forward to `claude remote-control` (e.g. --spawn=worktree --capacity=N).
     shift
     sess="ic-rc-$(date +%H%M%S)-$$"
-    ssh "$BOX" "screen -S $ANCHOR -X screen zsh -c 'screen -U -dmS $sess claude remote-control $*'; \
+    # bypassPermissions: phone-spawned sessions auto-approve too (isolated box).
+    ssh "$BOX" "screen -S $ANCHOR -X screen zsh -c 'screen -U -dmS $sess claude remote-control --permission-mode bypassPermissions $*'; \
                 for _ in \$(seq 25); do screen -ls 2>/dev/null | grep -q $sess && break; sleep 0.2; done"
     exec ssh "$BOX" -t "screen -U -x $sess"
     ;;
@@ -129,8 +134,10 @@ case "${1:-}" in
     # New session: spawn `claude <args>` in a fresh GUI-session screen via the
     # anchor, wait for it to come up, then attach. Only simple flags are
     # forwarded (no prompt forwarding), so this stays quote-safe.
+    # --dangerously-skip-permissions: the box is a throwaway sandbox, so
+    # auto-approve everything (no permission prompts).
     sess="ic-$(date +%H%M%S)-$$"
-    ssh "$BOX" "screen -S $ANCHOR -X screen zsh -c 'screen -U -dmS $sess claude $*'; \
+    ssh "$BOX" "screen -S $ANCHOR -X screen zsh -c 'screen -U -dmS $sess claude --dangerously-skip-permissions $*'; \
                 for _ in \$(seq 25); do screen -ls 2>/dev/null | grep -q $sess && break; sleep 0.2; done"
     exec ssh "$BOX" -t "screen -U -x $sess"
     ;;

@@ -363,6 +363,11 @@ login session, which is what makes computer use work. (Only one session should d
 at a time - separate text conversations are fine in parallel, but two doing computer use at
 once would fight over the one mouse and keyboard.)
 
+All `ic` claude sessions run with `--dangerously-skip-permissions` (and `ic rc` spawns
+phone sessions with `--permission-mode bypassPermissions`) - the box is an isolated sandbox
+with nothing sensitive to reach, so prompts are auto-approved. That's the whole point of
+running the agent here instead of on your main Mac.
+
 Running through the GUI session matters for `ic rc` too: `claude remote-control` reads the
 login token from the macOS Keychain, which is only reachable inside the GUI session - so a
 plain `ssh ... claude remote-control` reports "not logged in", but `ic rc` works. Press
