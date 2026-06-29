@@ -226,10 +226,12 @@ to the target's clipboard, or run it remotely:
 ssh <user>@<target-host>.local 'curl -fsSL https://claude.ai/install.sh | bash'
 ```
 
-The native installer may warn that `~/.local/bin` is not on PATH. Fix it on the target:
+The native installer may warn that `~/.local/bin` is not on PATH. Fix it on the target by
+adding it to **`~/.zshenv`** (not `~/.zshrc`) - `.zshenv` is read by *every* zsh, including
+non-interactive ones, so `claude` is also found by `zsh -c ...` (which step 11 relies on):
 
 ```bash
-ssh <user>@<target-host>.local 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.zshrc'
+ssh <user>@<target-host>.local 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.zshenv'
 ```
 
 ---
@@ -243,18 +245,20 @@ yt-dlp. Every item is toggleable; see the full list in
 [`claude-env-components.md`](claude-env-components.md).
 
 **Interactively on the target** - shows a checklist of every item (core
-pre-checked, opt-ins unchecked) so you can pick any combination:
+pre-checked, opt-ins unchecked) so you can pick any combination. Download the
+script onto the target and run it:
 
 ```bash
-scp setup-claude-env.sh <user>@<target-host>.local:
-ssh -t <user>@<target-host>.local './setup-claude-env.sh'
+ssh -t <user>@<target-host>.local \
+  'curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/setup-claude-env.sh -o setup-claude-env.sh && bash setup-claude-env.sh'
 ```
 
-**Non-interactively from the source** - no prompt; core only, or add flags
-(`--yt-dlp`, `--playwright`, `--all`, `--core`):
+**Non-interactively** - no prompt; core only, or add flags (`--yt-dlp`,
+`--playwright`, `--all`, `--core`):
 
 ```bash
-ssh <user>@<target-host>.local 'bash -s -- --all' < setup-claude-env.sh
+ssh <user>@<target-host>.local \
+  'curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/setup-claude-env.sh -o setup-claude-env.sh && bash setup-claude-env.sh --all'
 ```
 
 The script is idempotent (OK to re-run).
@@ -281,3 +285,59 @@ gh auth login
 
 I personally recommend using a **separate GitHub account**, not your main one, so it
 doesn't mess up your main account.
+
+---
+
+## 11. Computer use over SSH (optional)
+
+This lets an interactive `claude` session on the target both **see** (screenshots) and
+**control** (mouse/keyboard) the target's desktop - driven entirely over SSH.
+
+The obstacle: macOS gates screen capture and input behind **Screen Recording** and
+**Accessibility** permissions that are granted only in the GUI and tied to the GUI login
+session, so a process launched over SSH can't reach the display. The workaround: a
+**LaunchAgent** keeps a `screen` session alive *inside* the GUI session, and `claude`
+runs inside it. Because `claude` is then a child of the granted `screen` binary, computer
+use inherits the permissions and the display. You attach to that session over SSH.
+
+### One-time manual grants (can't be scripted)
+
+On the target (physically or via Screen Sharing), in **System Settings -> Privacy &
+Security**:
+
+1. **Screen Recording** -> **+** -> press **Cmd-Shift-G**, enter `/usr/bin/screen` -> add
+   and toggle **on**.
+2. **Accessibility** -> **+** -> `/usr/bin/screen` -> toggle **on**.
+3. The first time it captures, macOS shows a *"screen wants to bypass the window picker"*
+   prompt - click **Allow**. (This recurs roughly monthly on recent macOS.)
+
+macOS ignores synthetic clicks on these security prompts (it blocks them at the OS level,
+even for an app with Accessibility), so a human has to click them - in person or via Screen
+Sharing.
+
+### Scriptable setup
+
+Download [`setup-computer-use.sh`](setup-computer-use.sh) onto the target and run it there:
+
+```bash
+ssh -t <user>@<target-host>.local \
+  'curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/setup-computer-use.sh -o setup-computer-use.sh && bash setup-computer-use.sh'
+```
+
+This installs the LaunchAgent (`~/Library/LaunchAgents/com.boxclaude.plist`, a persistent
+`screen` session named `cc`) and enables the built-in `computer-use` tool in
+`~/.claude.json` (no `/mcp` menu needed). Requires a **Claude Pro or Max** plan. Re-runnable;
+run `bash setup-computer-use.sh --uninstall` on the target to remove the LaunchAgent and session.
+
+### Use it from your Mac
+
+Add an alias on the **source** Mac (like the clipboard aliases above):
+
+```bash
+alias boxclaude='ssh <user>@<target-host>.local -t "pgrep -x claude >/dev/null 2>&1 || screen -S cc -X screen zsh -c claude; exec screen -U -x cc"'
+```
+
+It starts `claude` in the `cc` session if it isn't already running (`zsh -c` so `claude`
+is found on PATH via `~/.zshenv`), then attaches. Run `boxclaude` to drive `claude` with
+computer use. Detach with **Ctrl-A** then **D** (don't exit `claude` - the session stays up
+either way, and re-running `boxclaude` reattaches to the same session).
