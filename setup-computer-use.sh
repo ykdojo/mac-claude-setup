@@ -47,6 +47,14 @@ uninstall() {
 command -v jq >/dev/null || { echo "jq is required"; exit 1; }
 [ -x /usr/bin/screen ] || { echo "/usr/bin/screen not found"; exit 1; }
 
+# 0. Ensure ~/.local/bin is on PATH for *non-interactive* zsh too (~/.zshenv, not
+#    ~/.zshrc). The attach alias starts claude with `zsh -c claude`, which only
+#    sees PATH from .zshenv - without this, `claude` isn't found.
+if ! grep -q '.local/bin' "$HOME/.zshenv" 2>/dev/null; then
+  log "Adding ~/.local/bin to ~/.zshenv (needed for 'zsh -c claude')"
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshenv"
+fi
+
 # 1. LaunchAgent: keep a `screen` session alive in the GUI login session.
 #    `screen -D -m` runs screen in the foreground as the launchd job's main
 #    process, so launchd doesn't reap a daemonized child; KeepAlive respawns it.

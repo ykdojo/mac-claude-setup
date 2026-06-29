@@ -226,10 +226,12 @@ to the target's clipboard, or run it remotely:
 ssh <user>@<target-host>.local 'curl -fsSL https://claude.ai/install.sh | bash'
 ```
 
-The native installer may warn that `~/.local/bin` is not on PATH. Fix it on the target:
+The native installer may warn that `~/.local/bin` is not on PATH. Fix it on the target by
+adding it to **`~/.zshenv`** (not `~/.zshrc`) - `.zshenv` is read by *every* zsh, including
+non-interactive ones, so `claude` is also found by `zsh -c ...` (which step 11 relies on):
 
 ```bash
-ssh <user>@<target-host>.local 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.zshrc'
+ssh <user>@<target-host>.local 'echo '\''export PATH="$HOME/.local/bin:$PATH"'\'' >> ~/.zshenv'
 ```
 
 ---
@@ -332,8 +334,10 @@ run `bash setup-computer-use.sh --uninstall` on the target to remove the LaunchA
 Add an alias on the **source** Mac (like the clipboard aliases above):
 
 ```bash
-alias boxclaude='ssh <user>@<target-host>.local -t "screen -r cc || screen -S cc -X screen claude; screen -r cc"'
+alias boxclaude='ssh <user>@<target-host>.local -t "pgrep -x claude >/dev/null 2>&1 || screen -S cc -X screen zsh -c claude; exec screen -x cc"'
 ```
 
-Run `boxclaude` to attach to the session and drive `claude` with computer use. Detach with
-**Ctrl-A** then **D** (don't exit - that ends the session until the agent restarts it).
+It starts `claude` in the `cc` session if it isn't already running (`zsh -c` so `claude`
+is found on PATH via `~/.zshenv`), then attaches. Run `boxclaude` to drive `claude` with
+computer use. Detach with **Ctrl-A** then **D** (don't exit `claude` - the session stays up
+either way, and re-running `boxclaude` reattaches to the same session).
