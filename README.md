@@ -21,6 +21,12 @@ to control it from your main machine.
 
 - A spare Mac (the **target**).
 - Your everyday Mac (the **source**), on the same Wi-Fi.
+- This repo cloned on the **source** Mac - steps 9 and 11 copy its scripts to the target:
+
+  ```bash
+  git clone https://github.com/ykdojo/mac-claude-setup.git
+  cd mac-claude-setup
+  ```
 
 ---
 
@@ -307,19 +313,23 @@ Security**:
 3. The first time it captures, macOS shows a *"screen wants to bypass the window picker"*
    prompt - click **Allow**. (This recurs roughly monthly on recent macOS.)
 
-macOS blocks automation from clicking these security prompts, so they must be done by a
-human at the machine.
+macOS ignores synthetic clicks on these security prompts (it blocks them at the OS level,
+even for an app with Accessibility), so a human has to click them - in person or via Screen
+Sharing.
 
-### Scriptable setup (on the target)
+### Scriptable setup
+
+Copy [`setup-computer-use.sh`](setup-computer-use.sh) to the target and run it there:
 
 ```bash
-./setup-computer-use.sh
+scp setup-computer-use.sh <user>@<target-host>.local:
+ssh -t <user>@<target-host>.local './setup-computer-use.sh'
 ```
 
 This installs the LaunchAgent (`~/Library/LaunchAgents/com.boxclaude.plist`, a persistent
 `screen` session named `cc`) and enables the built-in `computer-use` tool in
 `~/.claude.json` (no `/mcp` menu needed). Requires a **Claude Pro or Max** plan. Re-runnable;
-`./setup-computer-use.sh --uninstall` removes the LaunchAgent and session.
+run `./setup-computer-use.sh --uninstall` on the target to remove the LaunchAgent and session.
 
 ### Use it from your Mac
 
