@@ -239,19 +239,10 @@ Then run `claude` and follow the login prompts.
 ## 9. Set up an opinionated Claude Code environment (optional)
 
 The box works now. This optional step applies a set of opinionated defaults via
-[`setup-claude-env.sh`](setup-claude-env.sh) in this repo. It configures (every
-item is toggleable):
-
-- **Shell aliases:** `c` (claude), `cs` (`claude --dangerously-skip-permissions`),
-  and a `--fs` -> `--fork-session` wrapper
-- **DX plugin** from [`ykdojo/claude-code-tips`](https://github.com/ykdojo/claude-code-tips)
-  (installs Xcode Command Line Tools first if missing, since the plugin
-  marketplace uses git)
-- **settings.json:** tool search, no auto-updater, default model Opus 4.8,
-  attribution off, a status line, prompt suggestions off
-- **.claude.json:** pre-accept bypass-permissions mode, disable auto-compact
-- **Opt-in (off by default):** Playwright MCP (browser automation) and yt-dlp
-  (download video/audio from YouTube and other sites)
+[`setup-claude-env.sh`](setup-claude-env.sh) in this repo - shell aliases, the DX
+plugin, `settings.json` tweaks, the GitHub CLI, and (opt-in) Playwright MCP and
+yt-dlp. Every item is toggleable; see the full list in
+[`claude-env-components.md`](claude-env-components.md).
 
 **Interactively on the target** - shows a checklist of every item (core
 pre-checked, opt-ins unchecked) so you can pick any combination:
