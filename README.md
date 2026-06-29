@@ -183,13 +183,11 @@ If the machine runs on battery sometimes, use `-a` instead of `-c` to apply to a
 power sources (at the cost of battery drain).
 
 The screen can still **lock** when the screen saver kicks in. Stop the screen saver
-from ever starting:
+from ever starting so it never locks:
 
 ```bash
 defaults -currentHost write com.apple.screensaver idleTime 0
 ```
-
-With no screen saver and no display sleep, the screen never locks.
 
 ---
 
