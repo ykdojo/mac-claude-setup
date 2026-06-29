@@ -366,5 +366,4 @@ ic -h         # help
 
 All `ic` claude sessions run with `--dangerously-skip-permissions` (and `ic rc` spawns
 phone sessions with `--permission-mode bypassPermissions`) - the box is an isolated sandbox
-with nothing sensitive to reach, so prompts are auto-approved. That's the whole point of
-running the agent here instead of on your main Mac.
+with nothing sensitive to reach, so prompts are auto-approved.
