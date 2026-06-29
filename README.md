@@ -220,10 +220,12 @@ The commands take **no arguments** - they act on your system clipboard:
 ## 8. Install Claude Code on the target Mac
 
 Send the install command over and run it. From the source Mac you can push it straight
-to the target's clipboard, or run it remotely:
+to the target's clipboard, or run it remotely. The version is pinned for a reproducible
+install (matches [safeclaw](https://github.com/ykdojo/safeclaw); bump it as you like - the
+auto-updater is off, so the box stays on whatever you install):
 
 ```bash
-ssh <user>@<target-host>.local 'curl -fsSL https://claude.ai/install.sh | bash'
+ssh <user>@<target-host>.local 'curl -fsSL https://claude.ai/install.sh | bash -s -- 2.1.195'
 ```
 
 The native installer may warn that `~/.local/bin` is not on PATH. Fix it on the target by
