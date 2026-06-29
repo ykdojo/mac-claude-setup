@@ -72,6 +72,7 @@ cat > "$PLIST" <<PLISTEOF
   <key>ProgramArguments</key>
   <array><string>/usr/bin/screen</string><string>-U</string><string>-D</string><string>-m</string><string>-S</string><string>$SESSION</string><string>/bin/zsh</string></array>
   <key>EnvironmentVariables</key><dict><key>SHELL</key><string>/bin/zsh</string><key>TERM</key><string>xterm-256color</string></dict>
+  <key>WorkingDirectory</key><string>$HOME</string>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>ThrottleInterval</key><integer>1</integer>
@@ -101,6 +102,8 @@ else
 fi
 
 # 2. Enable the built-in computer-use tool for the home project (skips /mcp menu).
+#    enabledMcpServers is per-project, so this must match where claude runs - the
+#    LaunchAgent's WorkingDirectory above pins the session to $HOME so they agree.
 log "Enabling the computer-use tool in $CLAUDE_JSON (project: $HOME)"
 [ -f "$CLAUDE_JSON" ] || echo '{}' > "$CLAUDE_JSON"
 tmp=$(mktemp)
