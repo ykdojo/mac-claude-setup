@@ -233,3 +233,38 @@ ssh <user>@<target-host>.local
 ```
 
 Then run `claude` and follow the login prompts.
+
+---
+
+## 9. Set up an opinionated Claude Code environment (optional)
+
+The box works now. This optional step applies a set of opinionated defaults -
+the same ones used in [SafeClaw](https://github.com/ykdojo/safeclaw) - via
+[`setup-claude-env.sh`](setup-claude-env.sh) in this repo. It configures (every
+item is toggleable):
+
+- **Shell aliases:** `c` (claude), `cs` (bypass permissions), and a `--fs` ->
+  `--fork-session` wrapper
+- **DX plugin** from `ykdojo/claude-code-tips` (installs Xcode Command Line
+  Tools first if missing, since the plugin marketplace uses git)
+- **settings.json:** tool search, no auto-updater, default model Opus 4.8,
+  attribution off, a status line, prompt suggestions off
+- **.claude.json:** pre-accept bypass-permissions mode, disable auto-compact
+- **Opt-in (off by default):** Playwright MCP (browser automation) and yt-dlp
+
+**Interactively on the target** - shows a checklist of every item (core
+pre-checked, opt-ins unchecked) so you can pick any combination:
+
+```bash
+scp setup-claude-env.sh <user>@<target-host>.local:
+ssh -t <user>@<target-host>.local './setup-claude-env.sh'
+```
+
+**Non-interactively from the source** - no prompt; core only, or add flags
+(`--yt-dlp`, `--playwright`, `--all`, `--core`):
+
+```bash
+ssh <user>@<target-host>.local 'bash -s -- --all' < setup-claude-env.sh
+```
+
+Safe to re-run.
