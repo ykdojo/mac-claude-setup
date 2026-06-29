@@ -168,6 +168,7 @@ the source):
 ```bash
 sudo pmset -c sleep 0          # never system-sleep while plugged in (-c = on charger)
 sudo pmset -c disablesleep 1   # also prevents sleep with the lid closed (clamshell)
+sudo pmset -c displaysleep 0   # keep the display on too
 ```
 
 Verify:
@@ -176,11 +177,10 @@ Verify:
 pmset -g | grep -iE 'sleep'
 ```
 
-`sleep 0` and `SleepDisabled 1` in the output confirm it worked.
+`sleep 0`, `SleepDisabled 1`, and `displaysleep 0` in the output confirm it worked.
 
-The display can still sleep (`displaysleep`) - that's fine, it doesn't drop the
-network. If the machine runs on battery sometimes, use `-a` instead of `-c` to apply
-to all power sources (at the cost of battery drain).
+If the machine runs on battery sometimes, use `-a` instead of `-c` to apply to all
+power sources (at the cost of battery drain).
 
 ---
 
