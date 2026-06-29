@@ -349,6 +349,8 @@ ic -c         # continue the most recent conversation (forwards to: claude -c)
 ic -r         # resume picker (forwards to: claude -r)
 ic ls         # list live sessions on the box
 ic a [id]     # attach a running session (alias: ic attach; bare = attach if only one)
+ic kill [id]  # kill a session (alias: ic k); "ic kill all" kills all; bare = the only one
+ic -h         # help
 ```
 
 Detach with **Ctrl-A** then **D** - the session keeps running on the box; reattach with
