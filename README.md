@@ -182,6 +182,13 @@ pmset -g | grep -iE 'sleep'
 If the machine runs on battery sometimes, use `-a` instead of `-c` to apply to all
 power sources (at the cost of battery drain).
 
+The screen can still **lock** when the screen saver kicks in. Stop the screen saver
+from ever starting so it never locks:
+
+```bash
+defaults -currentHost write com.apple.screensaver idleTime 0
+```
+
 ---
 
 ## 7. Clipboard sync over SSH

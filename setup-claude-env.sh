@@ -2,7 +2,7 @@
 #
 # setup-claude-env.sh - configure an opinionated Claude Code environment on a Mac.
 #
-# Items (1-9 are core defaults; 10-11 are opt-in, off by default):
+# Items (1-8 are core defaults; 9-10 are opt-in, off by default):
 #   1. Shell aliases: c, cs, and a claude() wrapper (--fs -> --fork-session)
 #   2. DX plugin from ykdojo/claude-code-tips (installs Xcode Command Line
 #      Tools first if missing, since the plugin marketplace needs git)
@@ -10,20 +10,19 @@
 #   4. settings.json: default model claude-opus-4-8
 #   5. settings.json: attribution off (commit/pr/sessionUrl)
 #   6. context-bar status line
-#   7. .claude.json: hasAcceptedBypassPermissionsMode true
-#   8. .claude.json: autoCompactEnabled false
-#   9. GitHub CLI (gh) into ~/.local/bin (auth separately with 'gh auth login')
-#  10. Playwright MCP (installs Node + Google Chrome, headed)
-#  11. yt-dlp binary + skill
+#   7. .claude.json: autoCompactEnabled false
+#   8. GitHub CLI (gh) into ~/.local/bin (auth separately with 'gh auth login')
+#   9. Playwright MCP (installs Node + Google Chrome, headed)
+#  10. yt-dlp binary + skill
 #
 # Selection:
 #   - Run at a terminal with no flags -> interactive checklist (toggle any item;
 #     core pre-checked, opt-ins unchecked).
 #   - Piped / non-interactive with no flags -> core only (never hangs over SSH).
 #   - Flags skip the menu:
-#       --playwright   enable item 10
-#       --yt-dlp       enable item 11
-#       --all          enable items 10 and 11
+#       --playwright   enable item 9
+#       --yt-dlp       enable item 10
+#       --all          enable items 9 and 10
 #       --core         core only, no prompt
 #
 # Usage:
@@ -37,7 +36,7 @@ export PATH="$HOME/.local/bin:$PATH"
 log()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[skip]\033[0m %s\n' "$*"; }
 
-# Item labels (index 0..10 = items 1..11).
+# Item labels (index 0..9 = items 1..10).
 LABELS=(
   "Shell aliases (c / cs / --fs)"
   "DX plugin (ykdojo/claude-code-tips)"
@@ -45,23 +44,22 @@ LABELS=(
   "Default model: Opus 4.8"
   "Attribution off (commit / PR / sessionUrl)"
   "context-bar status line"
-  "Pre-accept bypass-permissions mode"
   "Disable auto-compact"
   "GitHub CLI (gh)"
   "Playwright MCP (heavy: Node + Chrome)"
   "yt-dlp binary + skill"
 )
-# Default selection: core (1-9) on, opt-ins (10-11) off.
-SEL=(1 1 1 1 1 1 1 1 1 0 0)
+# Default selection: core (1-8) on, opt-ins (9-10) off.
+SEL=(1 1 1 1 1 1 1 1 0 0)
 
 FLAGS_GIVEN=0
 for arg in "$@"; do
   case "$arg" in
-    --playwright) SEL[9]=1;  FLAGS_GIVEN=1 ;;
-    --yt-dlp)     SEL[10]=1; FLAGS_GIVEN=1 ;;
-    --all)        SEL[9]=1; SEL[10]=1; FLAGS_GIVEN=1 ;;
+    --playwright) SEL[8]=1;  FLAGS_GIVEN=1 ;;
+    --yt-dlp)     SEL[9]=1;  FLAGS_GIVEN=1 ;;
+    --all)        SEL[8]=1; SEL[9]=1; FLAGS_GIVEN=1 ;;
     --core)       FLAGS_GIVEN=1 ;;
-    -h|--help)    sed -n '2,34p' "$0"; exit 0 ;;
+    -h|--help)    sed -n '2,33p' "$0"; exit 0 ;;
     *) echo "Unknown option: $arg" >&2; exit 1 ;;
   esac
 done
@@ -77,7 +75,7 @@ interactive_menu() {
       printf "  %2d. %s %s\n" "$((i + 1))" "$mark" "${LABELS[$i]}"
     done
     echo
-    printf "Toggle by number (space-separated, e.g. \"10 11\"), or Enter to accept: "
+    printf "Toggle by number (space-separated, e.g. \"9 10\"), or Enter to accept: "
     local input n idx
     read -r input
     [ -z "$input" ] && break
@@ -158,7 +156,7 @@ setup_statusline_script() {
   chmod +x "$CLAUDE_DIR/scripts/context-bar.sh"
 }
 
-# --- 3-7. settings.json (each key gated on its own item) --------------------
+# --- 3-6. settings.json (each key gated on its own item) --------------------
 apply_settings() {
   local obj='{}'
   [ "${SEL[2]}" = 1 ] && obj=$(jq -n --argjson o "$obj" '$o + {env:{DISABLE_AUTOUPDATER:"1"}}')
@@ -176,15 +174,7 @@ apply_settings() {
   fi
 }
 
-# --- 7. .claude.json: pre-accept bypass-permissions -------------------------
-setup_bypass() {
-  log ".claude.json: hasAcceptedBypassPermissionsMode"
-  [ -f "$CLAUDE_JSON" ] || echo '{}' > "$CLAUDE_JSON"
-  local tmp; tmp=$(mktemp)
-  jq '. + {hasAcceptedBypassPermissionsMode: true}' "$CLAUDE_JSON" > "$tmp" && mv "$tmp" "$CLAUDE_JSON"
-}
-
-# --- 8. .claude.json: disable auto-compact ----------------------------------
+# --- 7. .claude.json: disable auto-compact ----------------------------------
 setup_autocompact() {
   log ".claude.json: autoCompactEnabled false"
   [ -f "$CLAUDE_JSON" ] || echo '{}' > "$CLAUDE_JSON"
@@ -192,7 +182,7 @@ setup_autocompact() {
   jq '. + {autoCompactEnabled: false}' "$CLAUDE_JSON" > "$tmp" && mv "$tmp" "$CLAUDE_JSON"
 }
 
-# --- 9. GitHub CLI ----------------------------------------------------------
+# --- 8. GitHub CLI ----------------------------------------------------------
 setup_gh() {
   log "GitHub CLI (gh)"
   ensure_clt   # gh repo clone / pr checkout shell out to git
@@ -210,7 +200,7 @@ setup_gh() {
   log "gh ${ver} installed - run 'gh auth login' to authenticate"
 }
 
-# --- 10. Playwright MCP (Google Chrome, headed) -----------------------------
+# --- 9. Playwright MCP (Google Chrome, headed) ------------------------------
 setup_playwright() {
   log "Playwright MCP (installs Node if missing, then Google Chrome)"
   if ! command -v node >/dev/null; then
@@ -228,7 +218,7 @@ setup_playwright() {
   claude mcp add playwright -- playwright-mcp --browser chrome || true
 }
 
-# --- 11. yt-dlp -------------------------------------------------------------
+# --- 10. yt-dlp -------------------------------------------------------------
 setup_ytdlp() {
   log "yt-dlp binary + skill"
   mkdir -p "$HOME/.local/bin" "$CLAUDE_DIR/skills/yt-dlp"
@@ -243,10 +233,9 @@ setup_ytdlp() {
 [ "${SEL[0]}" = 1 ] && setup_aliases
 if [ "${SEL[1]}" = 1 ]; then ensure_clt; setup_dx_plugin; fi
 apply_settings                                   # items 3-6, internally gated
-[ "${SEL[6]}" = 1 ] && setup_bypass
-[ "${SEL[7]}" = 1 ] && setup_autocompact
-[ "${SEL[8]}" = 1 ] && setup_gh
-if [ "${SEL[9]}" = 1 ]; then setup_playwright; fi
-[ "${SEL[10]}" = 1 ] && setup_ytdlp
+[ "${SEL[6]}" = 1 ] && setup_autocompact
+[ "${SEL[7]}" = 1 ] && setup_gh
+if [ "${SEL[8]}" = 1 ]; then setup_playwright; fi
+[ "${SEL[9]}" = 1 ] && setup_ytdlp
 
 log "Done. Open a new shell (or 'source ~/.zshrc') to pick up the aliases."

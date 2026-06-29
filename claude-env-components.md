@@ -1,7 +1,7 @@
 # Claude Code environment components
 
 The full list of what [`setup-claude-env.sh`](setup-claude-env.sh) can install.
-Core items (1-9) are on by default; opt-ins (10-11) are off by default. In
+Core items (1-8) are on by default; opt-ins (9-10) are off by default. In
 interactive mode you can toggle any combination.
 
 ## Core (on by default)
@@ -21,16 +21,14 @@ interactive mode you can toggle any combination.
 6. **context-bar [status line](https://github.com/ykdojo/claude-code-tips#tip-0-customize-your-status-line)** -
    downloads [`context-bar.sh`](https://github.com/ykdojo/claude-code-tips/blob/main/scripts/context-bar.sh)
    and wires it into `settings.json`.
-7. **Pre-accept bypass-permissions** - `.claude.json`:
-   `hasAcceptedBypassPermissionsMode: true`, so `cs` skips the bypass warning.
-8. **Disable auto-compact** - `.claude.json`: `autoCompactEnabled: false`.
-9. **GitHub CLI (gh)** - installs the `gh` binary into `~/.local/bin` (and the
+7. **Disable auto-compact** - `.claude.json`: `autoCompactEnabled: false`.
+8. **GitHub CLI (gh)** - installs the `gh` binary into `~/.local/bin` (and the
    Command Line Tools for git). Authenticate separately with `gh auth login`.
 
 ## Opt-in (off by default)
 
-10. **Playwright MCP** - browser automation. Installs Node (if missing) and
-    Google Chrome, then registers the MCP as `playwright-mcp --browser chrome`
-    (headed). Enable with `--playwright`.
-11. **yt-dlp** - the `yt-dlp` binary plus a skill, for downloading video/audio
+9. **Playwright MCP** - browser automation. Installs Node (if missing) and
+   Google Chrome, then registers the MCP as `playwright-mcp --browser chrome`
+   (headed). Enable with `--playwright`.
+10. **yt-dlp** - the `yt-dlp` binary plus a skill, for downloading video/audio
     from YouTube and other sites. Enable with `--yt-dlp`.
