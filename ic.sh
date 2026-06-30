@@ -13,7 +13,7 @@
 #   ic -c              # forwards to: claude -c   (continue)
 #   ic -r              # forwards to: claude -r   (resume picker)
 #   ic <claude flags>  # any other args forward to claude
-#   ic ls              # list live ic-* sessions (state, age, proc, last msg)
+#   ic ls              # list live ic-* sessions (state, age, proc, conversation)
 #   ic attach <id>     # attach a running session (alias: ic a)
 #
 # Config: set IC_BOX to <user>@<host> (default below).
@@ -40,7 +40,7 @@ Usage:
   ic rc              Remote Control: drive the box from your phone
                        (runs claude remote-control; extra args forward to it)
   ic history         stored conversations: count, location, recent (alias: hist)
-  ic ls              list live sessions (state, age, proc, last msg)
+  ic ls              list live sessions (state, age, proc, conversation)
   ic attach <id>     attach a running session (alias: ic a)
   ic kill <id>       kill a session (alias: ic k); 'ic kill all' kills all
   ic -h | --help     this help
@@ -60,10 +60,11 @@ case "${1:-}" in
 
   ls)
     # Each live ic-* screen session: attach state, age, what's running (interactive
-    # claude / claude remote-control / a plain shell), and the conversation's last
-    # user message. The screen daemon's claude descendant is matched to its
-    # conversation via ~/.claude/sessions/<pid>.json (records the sessionId), then
-    # to the transcript at ~/.claude/projects/<proj>/<sessionId>.jsonl.
+    # claude / claude remote-control / a plain shell), and the conversation's AI
+    # title (the same one /resume shows; falls back to the last prompt). The screen
+    # daemon's claude descendant is matched to its conversation via
+    # ~/.claude/sessions/<pid>.json (records the sessionId), then to the transcript
+    # at ~/.claude/projects/<proj>/<sessionId>.jsonl.
     ssh "$BOX" 'bash -s' <<'RSCRIPT'
 proj=$(echo "$HOME" | sed 's:/:-:g'); pdir="$HOME/.claude/projects/$proj"; sdir="$HOME/.claude/sessions"
 screen -wipe >/dev/null 2>&1
@@ -79,7 +80,7 @@ fmt_age() {
   elif [ $t -ge 3600 ]; then echo "$((t/3600))h$(((t%3600)/60))m"
   elif [ $t -ge 60 ]; then echo "$((t/60))m"; else echo "${t}s"; fi
 }
-printf "%-20s %-9s %-7s %-10s %s\n" "SESSION" "STATE" "AGE" "PROC" "CONVERSATION (last msg)"
+printf "%-20s %-9s %-7s %-10s %s\n" "SESSION" "STATE" "AGE" "PROC" "CONVERSATION"
 printf '%s\n' "$out" | while IFS= read -r line; do
   entry=$(printf '%s' "$line" | grep -oE "[0-9]+\.ic-[A-Za-z0-9_-]+")
   spid=${entry%%.*}; name=${entry#*.}
@@ -100,7 +101,7 @@ printf '%s\n' "$out" | while IFS= read -r line; do
   if [ "$proc" = claude ]; then
     sid=$(sed -n 's/.*"sessionId":"\([^"]*\)".*/\1/p' "$sdir/$cpid.json")
     jf="$pdir/$sid.jsonl"
-    [ -f "$jf" ] && conv=$(jq -rs '[.[]|select(.type=="user")|.message.content|if type=="array" then (map(select(.type=="text").text)|join(" ")) else . end|select(.!=null and .!="")]|last // ""' "$jf" 2>/dev/null | tr "\n\t" "  " | sed "s/  */ /g" | cut -c1-46)
+    [ -f "$jf" ] && conv=$(jq -rs '(last(.[]|select(.type=="ai-title")|.aiTitle)) // (last(.[]|select(.type=="last-prompt")|.lastPrompt)) // ""' "$jf" 2>/dev/null | tr "\n\t" "  " | sed "s/  */ /g" | cut -c1-50)
   elif [ "$proc" = claude-rc ]; then conv="(remote-control host)"; fi
   printf "%-20s %-9s %-7s %-10s %s\n" "$name" "$state" "$age" "$proc" "$conv"
 done
