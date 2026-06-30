@@ -206,7 +206,7 @@ them to `~/.zshrc` on the **source** Mac:
 NEWMAC="<user>@<target-host>.local"
 sendclip() {
   # image on the clipboard? ship it as PNG and set the target clipboard; else text
-  if osascript -e 'clipboard info' 2>/dev/null | grep -q 'PNGf\|TIFF\|picture'; then
+  if osascript -e 'clipboard info' 2>/dev/null | grep -qE 'PNGf|TIFF|picture'; then
     local f; f=$(mktemp).png
     osascript -e "set h to (open for access (POSIX file \"$f\") with write permission)" \
               -e 'write (the clipboard as «class PNGf») to h' \
@@ -221,7 +221,9 @@ sendclip() {
 alias getclip='ssh "$NEWMAC" pbpaste | pbcopy'
 ```
 
-Then run `source ~/.zshrc` to load them.
+Then open a new shell to load them. If you previously had an `alias sendclip=...` line, delete
+it - zsh won't define a function whose name shadows an active alias (you'd get a "defining
+function based on alias" parse error), so the old alias line must be gone and the shell fresh.
 
 The commands take **no arguments** - they act on your system clipboard:
 
