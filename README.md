@@ -350,6 +350,12 @@ ic -h            # help
 All `ic` sessions run with `--dangerously-skip-permissions` (and `ic rc` uses
 `--permission-mode bypassPermissions`) - the box is an isolated sandbox, so prompts are auto-approved.
 
+**Copying text out:** sessions run in tmux, and Terminal.app can't receive the clipboard escape
+sequences (OSC52) that claude emits, so mouse-selecting a snippet won't reliably reach your Mac
+clipboard. Quick workaround: **Cmd-A then Cmd-C** copies the whole visible screen. For precise
+per-selection copy, use **iTerm2** instead of Terminal.app (it supports OSC52, so copy lands on
+your Mac clipboard directly).
+
 ### One-time grants (can't be scripted)
 
 Screen Recording and Accessibility can only be granted in the GUI, and a human has to do it at
