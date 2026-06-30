@@ -352,17 +352,11 @@ All `ic` sessions run with `--dangerously-skip-permissions` (and `ic rc` uses
 
 ### One-time grants (can't be scripted)
 
-Screen Recording and Accessibility can only be granted in the GUI. Easiest path: `ic` into the
-box and ask Claude to use computer use (e.g. "take a screenshot"). That triggers macOS's
-permission requests and adds a `claude` entry under **System Settings -> Privacy & Security** -
-toggle **Screen Recording** and **Accessibility** on for it, then restart Claude.
+Screen Recording and Accessibility can only be granted in the GUI, and a human has to do it at
+the machine (in person or via Screen Sharing) - macOS blocks synthetic clicks on these prompts.
+On first capture you'll also **Allow** a *"bypass the window picker"* prompt (recurs ~monthly).
 
-A human has to do this at the machine (in person or via Screen Sharing) - macOS blocks synthetic
-clicks on these prompts. On first capture you'll also **Allow** a *"bypass the window picker"*
-prompt (recurs ~monthly). The grants are tied to the `claude` binary, so a claude update that
-moves its path can drop them - just re-grant.
-
-**Under the tmux setup, the grants go on `tmux`, not `claude`.** macOS attributes
+**The grants go on `tmux`, not `claude`.** macOS attributes
 capture/control to the *responsible process* in the chain, which here is the `tmux` server
 (claude runs as its child, reparented to launchd). So:
 
@@ -378,6 +372,11 @@ To make the entries appear in System Settings in the first place, trigger a comp
 (`ic`, then ask Claude to "take a screenshot") - macOS adds `tmux` to the list (toggled off) so
 you can switch it on. Switching from a previous `screen`-based setup surfaces these prompts
 again because the responsible process changed.
+
+The `claude` binary does **not** need its own grant (verified: with `claude` toggled off and
+only `tmux` on, computer use still works). A bonus over the old screen setup: because the grant
+is tied to `tmux`, a `claude` auto-update - which moves its versioned binary path - no longer
+drops computer-use access. Only a `tmux` upgrade would, which is rare.
 
 ---
 
