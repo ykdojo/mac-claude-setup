@@ -197,23 +197,23 @@ macOS ships `pbcopy` (write clipboard) and `pbpaste` (read clipboard). Piped ove
 they move the clipboard between machines - encrypted, peer-to-peer, no account, no
 third-party service.
 
-We'll set up two aliases: `sendclip` pushes your clipboard from the source to the
-target, and `getclip` pulls the target's clipboard back to the source. Add them to
-`~/.zshrc` on the **source** Mac:
+[`clip.sh`](clip.sh) wraps this into one command with two subcommands, and adds **image**
+support on top of `pbcopy`/`pbpaste` (which are text-only). Install it as a script on your PATH
+on the **source** Mac, and point it at the target host with `IC_BOX`:
 
 ```bash
-# --- Target Mac clipboard over SSH ---
-NEWMAC="<user>@<target-host>.local"
-alias sendclip='pbpaste | ssh "$NEWMAC" pbcopy'
-alias getclip='ssh "$NEWMAC" pbpaste | pbcopy'
+curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/clip.sh -o ~/.local/bin/clip
+chmod +x ~/.local/bin/clip
+export IC_BOX="<user>@<target-host>.local"   # add to ~/.zshrc
 ```
 
-Then run `source ~/.zshrc` to load them.
+Usage:
 
-The commands take **no arguments** - they act on your system clipboard:
-
-- **sendclip**: copy on the source (Cmd-C), run `sendclip`, paste on the target (Cmd-V).
-- **getclip**: copy on the target (Cmd-C), run `getclip`, paste on the source (Cmd-V).
+- **`clip send`** - this Mac's clipboard → the target (text or image). For an image you can
+  paste it straight into a Claude Code session on the target with **Ctrl-V** (the target has
+  one shared pasteboard for SSH and GUI sessions, and Claude reads it on paste; the terminal
+  can't carry image bytes through a normal paste).
+- **`clip get`** - the target's clipboard → this Mac (text or image); then Cmd-V to paste.
 
 ---
 
@@ -300,8 +300,13 @@ setup below exists to route around that.
 
 **Why it needs a workaround:** macOS gates screen capture and input behind Screen Recording
 and Accessibility permissions that are GUI-only and tied to the GUI login session, so an SSH
-process can't reach the display. Fix: a LaunchAgent keeps a `screen` session alive *inside*
-the GUI session and runs `claude` there, so `claude` can reach the display. You attach over SSH.
+process can't reach the display. Fix: a LaunchAgent keeps a `tmux` server alive *inside* the
+GUI session on a fixed socket; every `claude` session created there (by `ic`) lands on that
+server and inherits the GUI session, so it can reach the display. You attach over SSH.
+
+(tmux, not screen: macOS's system `screen` is the 2006 4.00.03 build, which can't render
+emoji, and even Homebrew screen 5.x replaces astral-plane emoji like 📁 with a placeholder.
+tmux renders them correctly, and its single-server model is simpler to drive.)
 
 ### Scriptable setup
 
@@ -312,9 +317,9 @@ ssh -t <user>@<target-host>.local \
   'curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/setup-computer-use.sh -o setup-computer-use.sh && bash setup-computer-use.sh'
 ```
 
-Installs the LaunchAgent (persistent `screen` session `cc`) and enables the built-in
-`computer-use` tool in `~/.claude.json`. Requires a **Claude Pro or Max** plan. Re-runnable;
-`--uninstall` to remove.
+Installs the LaunchAgent (persistent `tmux` server with anchor session `cc`) and enables the
+built-in `computer-use` tool in `~/.claude.json`. Requires **tmux** (`brew install tmux`) and a
+**Claude Pro or Max** plan. Re-runnable; `--uninstall` to remove.
 
 ### Use it from your Mac
 
@@ -345,17 +350,37 @@ ic -h            # help
 All `ic` sessions run with `--dangerously-skip-permissions` (and `ic rc` uses
 `--permission-mode bypassPermissions`) - the box is an isolated sandbox, so prompts are auto-approved.
 
+**Copying text out:** sessions run in tmux, and Terminal.app can't receive the clipboard escape
+sequences (OSC52) that claude emits, so mouse-selecting a snippet won't reliably reach your Mac
+clipboard. Quick workaround: **Cmd-A then Cmd-C** copies the whole visible screen.
+
 ### One-time grants (can't be scripted)
 
-Screen Recording and Accessibility can only be granted in the GUI. Easiest path: `ic` into the
-box and ask Claude to use computer use (e.g. "take a screenshot"). That triggers macOS's
-permission requests and adds a `claude` entry under **System Settings -> Privacy & Security** -
-toggle **Screen Recording** and **Accessibility** on for it, then restart Claude.
+Screen Recording and Accessibility can only be granted in the GUI, and a human has to do it at
+the machine (in person or via Screen Sharing) - macOS blocks synthetic clicks on these prompts.
+On first capture you'll also **Allow** a *"bypass the window picker"* prompt (recurs ~monthly).
 
-A human has to do this at the machine (in person or via Screen Sharing) - macOS blocks synthetic
-clicks on these prompts. On first capture you'll also **Allow** a *"bypass the window picker"*
-prompt (recurs ~monthly). The grants are tied to the `claude` binary, so a claude update that
-moves its path can drop them - just re-grant.
+**The grants go on `tmux`, not `claude`.** macOS attributes
+capture/control to the *responsible process* in the chain, which here is the `tmux` server
+(claude runs as its child, reparented to launchd). So:
+
+1. Grant **tmux** (`/usr/local/bin/tmux`, or `/opt/homebrew/bin/tmux` on Apple Silicon) under
+   **both** Screen Recording **and** Accessibility - Screen Recording covers screenshots,
+   Accessibility covers mouse/keyboard control. Granting only one leaves the other failing.
+2. **Restart the tmux server after granting** - a running process caches its permission state
+   at launch, so a grant won't take effect until the server restarts:
+   `tmux -S /tmp/cc-tmux.sock kill-server` (the LaunchAgent respawns the anchor within seconds).
+   claude sessions started after the restart pick up the new grant.
+
+To make the entries appear in System Settings in the first place, trigger a computer-use action
+(`ic`, then ask Claude to "take a screenshot") - macOS adds `tmux` to the list (toggled off) so
+you can switch it on. Switching from a previous `screen`-based setup surfaces these prompts
+again because the responsible process changed.
+
+The `claude` binary does **not** need its own grant (verified: with `claude` toggled off and
+only `tmux` on, computer use still works). A bonus over the old screen setup: because the grant
+is tied to `tmux`, a `claude` auto-update - which moves its versioned binary path - no longer
+drops computer-use access. Only a `tmux` upgrade would, which is rare.
 
 ---
 
@@ -369,8 +394,8 @@ You can just ask the box's Claude to do it: `ic` in and say "install Proton VPN"
 download and install the app. The parts it **can't** do alone:
 
 - **Credentials.** Signing in is required (even free tiers need an account), and that's
-  yours to enter. Send the password over securely with the `sendclip` command from
-  [section 7](#7-clipboard-sync-over-ssh): copy it on your Mac, run `sendclip`, then paste
+  yours to enter. Send the password over securely with `clip send` from
+  [section 7](#7-clipboard-sync-over-ssh): copy it on your Mac, run `clip send`, then paste
   into the sign-in field on the box.
 - **macOS permission prompts.** The first connect pops a system prompt to allow a VPN /
   network configuration (and may ask for the Mac password) - approve it at the machine.
