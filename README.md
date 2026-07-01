@@ -197,41 +197,23 @@ macOS ships `pbcopy` (write clipboard) and `pbpaste` (read clipboard). Piped ove
 they move the clipboard between machines - encrypted, peer-to-peer, no account, no
 third-party service.
 
-We'll set up `sendclip` (push the source clipboard to the target) and `getclip` (pull the
-target's clipboard back). `sendclip` handles **text and images**; `getclip` is text-only. Add
-them to `~/.zshrc` on the **source** Mac:
+[`clip.sh`](clip.sh) wraps this into one command with two subcommands, and adds **image**
+support on top of `pbcopy`/`pbpaste` (which are text-only). Install it on the **source** Mac
+like `ic` - a script on your PATH, configured by the same `IC_BOX` variable:
 
 ```bash
-# --- Target Mac clipboard over SSH ---
-NEWMAC="<user>@<target-host>.local"
-sendclip() {
-  # image on the clipboard? ship it as PNG and set the target clipboard; else text
-  if osascript -e 'clipboard info' 2>/dev/null | grep -qE 'PNGf|TIFF|picture'; then
-    local f; f=$(mktemp).png
-    osascript -e "set h to (open for access (POSIX file \"$f\") with write permission)" \
-              -e 'write (the clipboard as «class PNGf») to h' \
-              -e 'close access h' >/dev/null 2>&1
-    scp -q "$f" "$NEWMAC:/tmp/.sendclip.png" &&
-      ssh "$NEWMAC" 'osascript -e "set the clipboard to (read (POSIX file \"/tmp/.sendclip.png\") as «class PNGf»)"'
-    rm -f "$f"; echo "image -> target clipboard (press Ctrl-V in your ic session to attach it to claude)"
-  else
-    pbpaste | ssh "$NEWMAC" pbcopy; echo "text -> target clipboard (paste with Cmd-V)"
-  fi
-}
-alias getclip='ssh "$NEWMAC" pbpaste | pbcopy'
+curl -fsSL https://raw.githubusercontent.com/ykdojo/mac-claude-setup/main/clip.sh -o ~/.local/bin/clip
+chmod +x ~/.local/bin/clip
+export IC_BOX="<user>@<target-host>.local"   # add to ~/.zshrc; shared with ic
 ```
 
-Then open a new shell to load them. If you previously had an `alias sendclip=...` line, delete
-it - zsh won't define a function whose name shadows an active alias (you'd get a "defining
-function based on alias" parse error), so the old alias line must be gone and the shell fresh.
+Usage:
 
-The commands take **no arguments** - they act on your system clipboard:
-
-- **sendclip**: copy on the source (Cmd-C), run `sendclip`, paste on the target (Cmd-V).
-  An image works too - and you can paste it straight into a Claude Code session on the target
-  with **Ctrl-V** (the target has one shared pasteboard for SSH and GUI sessions, and Claude
-  reads it on paste; the terminal can't carry image bytes through a normal paste).
-- **getclip**: copy on the target (Cmd-C), run `getclip`, paste on the source (Cmd-V).
+- **`clip send`** - this Mac's clipboard → the target (text or image). For an image you can
+  paste it straight into a Claude Code session on the target with **Ctrl-V** (the target has
+  one shared pasteboard for SSH and GUI sessions, and Claude reads it on paste; the terminal
+  can't carry image bytes through a normal paste).
+- **`clip get`** - the target's clipboard → this Mac (text or image); then Cmd-V to paste.
 
 ---
 
@@ -412,8 +394,8 @@ You can just ask the box's Claude to do it: `ic` in and say "install Proton VPN"
 download and install the app. The parts it **can't** do alone:
 
 - **Credentials.** Signing in is required (even free tiers need an account), and that's
-  yours to enter. Send the password over securely with the `sendclip` command from
-  [section 7](#7-clipboard-sync-over-ssh): copy it on your Mac, run `sendclip`, then paste
+  yours to enter. Send the password over securely with `clip send` from
+  [section 7](#7-clipboard-sync-over-ssh): copy it on your Mac, run `clip send`, then paste
   into the sign-in field on the box.
 - **macOS permission prompts.** The first connect pops a system prompt to allow a VPN /
   network configuration (and may ask for the Mac password) - approve it at the machine.
